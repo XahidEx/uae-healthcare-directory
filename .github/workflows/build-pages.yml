@@ -19,8 +19,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install markdown package
-        run: pip install markdown
+      - name: Install Python packages
+        run: pip install markdown beautifulsoup4
 
       - name: Run md_to_html.py script
         run: python md_to_html.py
