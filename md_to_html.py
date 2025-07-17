@@ -1,5 +1,6 @@
 import os
 import markdown
+import re
 
 DATA_DIR = "data"
 DOCS_DIR = "docs"
@@ -15,22 +16,43 @@ html_template = """
   <title>{title}</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-white text-gray-900 font-sans">
+<body class="bg-white text-gray-900 font-sans min-h-screen">
   <main class="max-w-6xl mx-auto p-6">
     <h1 class="text-3xl font-bold mb-6 text-blue-700">🏥 Clinics and Hospitals in {title}</h1>
-    <div class="overflow-auto">{content}</div>
+    <div class="overflow-x-auto prose prose-indigo max-w-full">{content}</div>
     <a href="index.html" class="inline-block mt-8 text-blue-600 hover:underline">← Back to Directory</a>
   </main>
 </body>
 </html>
 """
 
+def add_tailwind_to_tables(html_content):
+    # Add Tailwind classes to <table> tags for nice styling
+    # e.g. class="min-w-full divide-y divide-gray-200 border"
+    def repl(match):
+        table_tag = match.group(0)
+        if 'class=' in table_tag:
+            return table_tag  # don't override if class exists
+        return table_tag.replace(
+            "<table>",
+            '<table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-md">'
+        )
+    # Replace all <table> without class attribute
+    return re.sub(r'<table(?![^>]*class)[^>]*>', repl, html_content)
+
 def convert_md_to_html(md_path, html_path):
     with open(md_path, "r", encoding="utf-8") as md_file:
         md_content = md_file.read()
-    html_content = markdown.markdown(md_content)
+
+    # Convert markdown to HTML (you can add extensions here if you want)
+    html_content = markdown.markdown(md_content, extensions=["tables", "fenced_code", "nl2br"])
+
+    # Add Tailwind classes to tables
+    html_content = add_tailwind_to_tables(html_content)
+
     title = os.path.splitext(os.path.basename(md_path))[0].replace("-", " ").title()
     full_html = html_template.format(title=title, content=html_content)
+
     with open(html_path, "w", encoding="utf-8") as html_file:
         html_file.write(full_html)
     print(f"Converted {md_path} -> {html_path}")
