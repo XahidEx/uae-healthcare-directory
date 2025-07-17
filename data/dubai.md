@@ -2,4 +2,4 @@
 
 | Clinic Name        | Services                                                   | Website                                |
 |--------------------|------------------------------------------------------------|----------------------------------------|
-| Somerset Clinic    | Paediatrics, Dental, Orthopedic Surgery-Spinal Treatment, Family Medicine, Psychotherapy | [somersetclinic.ae](https://somersetclinic.ae) |
+| [Somerset Clinic](https://somersetclinic.ae)    | Paediatrics, Dental, Orthopedic Surgery-Spinal Treatment, Family Medicine, Psychotherapy | [somersetclinic.ae](https://somersetclinic.ae) |
