@@ -14,6 +14,17 @@ html_template = """
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title} | UAE Healthcare Directory</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Directory of clinics and hospitals in UAE by emirate, including services and contact details." />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="{title} | UAE Healthcare Directory" />
+  <meta property="og:description" content="Find clinics and hospitals across UAE emirates with services and links." />
+  <meta property="og:url" content="https://xahidex.github.io/uae-healthcare-directory/" />
+  <meta property="og:type" content="website" />
+
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
