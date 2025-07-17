@@ -1,6 +1,6 @@
 import os
 import markdown
-import re
+from bs4 import BeautifulSoup
 
 DATA_DIR = "data"
 DOCS_DIR = "docs"
@@ -26,29 +26,38 @@ html_template = """
 </html>
 """
 
-def add_tailwind_to_tables(html_content):
-    # Add Tailwind classes to <table> tags for nice styling
-    # e.g. class="min-w-full divide-y divide-gray-200 border"
-    def repl(match):
-        table_tag = match.group(0)
-        if 'class=' in table_tag:
-            return table_tag  # don't override if class exists
-        return table_tag.replace(
-            "<table>",
-            '<table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-md">'
-        )
-    # Replace all <table> without class attribute
-    return re.sub(r'<table(?![^>]*class)[^>]*>', repl, html_content)
+def style_tables(html_content):
+    soup = BeautifulSoup(html_content, "html.parser")
+    tables = soup.find_all("table")
+    for table in tables:
+        # Add classes to table
+        table['class'] = table.get('class', []) + ["min-w-full", "divide-y", "divide-gray-200", "border", "border-gray-300", "rounded-md", "table-auto"]
+        
+        # Style thead
+        thead = table.find("thead")
+        if thead:
+            thead['class'] = thead.get('class', []) + ["bg-gray-50"]
+            for th in thead.find_all("th"):
+                th['class'] = th.get('class', []) + ["px-6", "py-3", "text-left", "text-xs", "font-medium", "text-gray-500", "uppercase", "tracking-wider"]
+
+        # Style tbody rows
+        tbody = table.find("tbody")
+        if tbody:
+            for tr in tbody.find_all("tr"):
+                tr['class'] = tr.get('class', []) + ["bg-white", "even:bg-gray-50"]
+                for td in tr.find_all("td"):
+                    td['class'] = td.get('class', []) + ["px-6", "py-4", "whitespace-nowrap", "text-sm", "text-gray-900"]
+    return str(soup)
 
 def convert_md_to_html(md_path, html_path):
     with open(md_path, "r", encoding="utf-8") as md_file:
         md_content = md_file.read()
 
-    # Convert markdown to HTML (you can add extensions here if you want)
+    # Convert markdown to HTML (tables, fenced_code, nl2br enabled)
     html_content = markdown.markdown(md_content, extensions=["tables", "fenced_code", "nl2br"])
 
-    # Add Tailwind classes to tables
-    html_content = add_tailwind_to_tables(html_content)
+    # Add Tailwind classes to tables and their elements
+    html_content = style_tables(html_content)
 
     title = os.path.splitext(os.path.basename(md_path))[0].replace("-", " ").title()
     full_html = html_template.format(title=title, content=html_content)
