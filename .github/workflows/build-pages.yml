@@ -1,0 +1,72 @@
+name: Build GitHub Pages from Markdown
+
+on:
+  push:
+    paths:
+      - 'data/**/*.md'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install markdown package
+        run: pip install markdown
+
+      - name: Convert markdown files to HTML pages
+        run: |
+          mkdir -p docs
+          for file in data/*.md; do
+            filename=$(basename "$file" .md)
+            python3 -c "
+import markdown
+import os
+
+md_path = '$file'
+html_path = f'docs/{filename}.html'
+
+with open(md_path, 'r', encoding='utf-8') as f:
+    text = f.read()
+
+html_body = markdown.markdown(text)
+
+html_template = f'''
+<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+<meta charset=\"UTF-8\">
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+<title>{filename.replace('-', ' ').title()} Clinics & Hospitals</title>
+<script src=\"https://cdn.tailwindcss.com\"></script>
+</head>
+<body class=\"bg-white text-gray-900 font-sans\">
+  <main class=\"max-w-6xl mx-auto p-6\">
+    <h1 class=\"text-3xl font-bold mb-6 text-blue-700\">🏥 Clinics and Hospitals in {filename.replace('-', ' ').title()}</h1>
+    <div class=\"overflow-auto\">{html_body}</div>
+    <a href=\"index.html\" class=\"inline-block mt-8 text-blue-600 hover:underline\">← Back to Directory</a>
+  </main>
+</body>
+</html>
+'''
+
+with open(html_path, 'w', encoding='utf-8') as out_f:
+    out_f.write(html_template)
+"
+          done
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/*.html
+          git diff --cached --quiet || git commit -m "Auto-generate HTML pages from markdown"
+          git push
